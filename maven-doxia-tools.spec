@@ -1,6 +1,6 @@
 Name:		maven-doxia-tools
 Version:	1.2
-Release:	5
+Release:	7
 Summary:	Maven Doxia Integration Tools
 
 Group:		Development/Java
