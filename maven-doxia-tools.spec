@@ -1,40 +1,38 @@
 Name:		maven-doxia-tools
-Version:	1.2
-Release:	7
+Version:	1.4
+Release:	1
 Summary:	Maven Doxia Integration Tools
 
 Group:		Development/Java
 License:	ASL 2.0
 URL:		http://maven.apache.org/shared/maven-doxia-tools/
-# svn export http://svn.apache.org/repos/asf/maven/shared/tags/maven-doxia-tools-1.2/
-Source0:	%{name}-%{version}.tbz
-Patch0:		%{name}-update-interpolation.patch
+Source0:	http://repo1.maven.org/maven2/org/apache/maven/shared/%{name}/%{version}/%{name}-%{version}-source-release.zip
+Patch0:		%{name}-migration-to-component-metadata.patch
 
-BuildRoot:	%(mktemp -ud %{_tmppath}/%{name}-%{version}-%{release}-XXXXXX)
-
-BuildRequires:	jakarta-commons-io >= 1.4
-BuildRequires:	jakarta-commons-logging
+BuildRequires:	apache-commons-io >= 1.4
+BuildRequires:	apache-commons-logging
 BuildRequires:	plexus-utils
 BuildRequires:	plexus-interpolation
 BuildRequires:	plexus-container-default
 BuildRequires:	plexus-i18n
+BuildRequires:	maven
 BuildRequires:	maven-shared
 BuildRequires:	maven-doxia
 BuildRequires:	maven-doxia-sitetools
-BuildRequires:	maven2-plugin-compiler
-BuildRequires:	maven2-plugin-install
-BuildRequires:	maven2-plugin-jar
-BuildRequires:	maven2-plugin-javadoc
-BuildRequires:	maven2-plugin-resources
-BuildRequires:	maven2-plugin-surefire
-BuildRequires:	maven-shared-plugin-testing-harness
+BuildRequires:	maven-compiler-plugin
+BuildRequires:	maven-install-plugin
+BuildRequires:	maven-jar-plugin
+BuildRequires:	maven-javadoc-plugin
+BuildRequires:	maven-resources-plugin
+BuildRequires:	maven-surefire-plugin
+BuildRequires:	maven-plugin-testing-harness
 BuildRequires:	maven-shared-reporting-impl
-BuildRequires:	plexus-maven-plugin
-BuildRequires:	java-devel >= 0:1.6.0
+BuildRequires:	plexus-containers-component-metadata
+BuildRequires:	java-devel >= 1.6.0
 
 BuildArch:	noarch
 
-Requires:	jakarta-commons-io >= 1.4
+Requires:	apache-commons-io >= 1.4
 Requires:	plexus-utils
 Requires:	plexus-interpolation
 Requires:	plexus-container-default
@@ -44,8 +42,6 @@ Requires:	maven-doxia
 Requires:	maven-doxia-sitetools
 
 Requires:	jpackage-utils
-Requires(post):	jpackage-utils
-Requires(postun):	jpackage-utils
 
 %description
 A collection of tools to help the integration of Doxia in Maven plugins.
@@ -60,53 +56,34 @@ API documentation for %{name}.
 
 %prep
 %setup -q
-%patch0 -p1
+%patch0 -b .sav
 
 
 %build
-export MAVEN_REPO_LOCAL=$(pwd)/.m2/repository
-mkdir -p $MAVEN_REPO_LOCAL
-
-mvn-jpp \
-	-Dmaven.repo.local=$MAVEN_REPO_LOCAL \
+mvn-rpmbuild \
 	-Dmaven.test.skip=true \
-	install javadoc:javadoc
-
+	install javadoc:aggregate
 
 %install
-rm -rf $RPM_BUILD_ROOT
+# jars
+install -Dm 644 target/%{name}-%{version}.jar %{buildroot}/%{_javadir}/%{name}.jar
 
-mkdir -p $RPM_BUILD_ROOT%{_javadir}
+# javadoc
+install -d -m 755 %{buildroot}/%{_javadocdir}/%{name}
+cp -pr target/site/apidocs/* %{buildroot}/%{_javadocdir}/%{name}
 
-install -m 644 target/%{name}-%{version}.jar \
-  $RPM_BUILD_ROOT%{_javadir}/%{name}-%{version}.jar
-(cd $RPM_BUILD_ROOT%{_javadir} && for jar in *-%{version}.jar; do ln -sf ${jar} `echo $jar| sed "s|-%{version}||g"`; done)
+# poms
+install -Dpm 644 pom.xml %{buildroot}/%{_mavenpomdir}/JPP-%{name}.pom
 
-mkdir -p $RPM_BUILD_ROOT%{_javadocdir}/%{name}-%{version}
-cp -pr target/site/apidocs/* $RPM_BUILD_ROOT%{_javadocdir}/%{name}-%{version}
-(cd $RPM_BUILD_ROOT%{_javadocdir} && ln -sf %{name}-%{version} %{name})
-
-install -d -m 755 $RPM_BUILD_ROOT%{_mavenpomdir}
-install -pm 644 pom.xml $RPM_BUILD_ROOT/%{_mavenpomdir}/JPP-%{name}.pom
-
-%add_to_maven_depmap org.apache.maven.shared %{name} %{version} JPP %{name}
-
-%clean
-rm -rf $RPM_BUILD_ROOT
-
-%post
-%update_maven_depmap
-
-%postun
-%update_maven_depmap
+%add_maven_depmap JPP-%{name}.pom %{name}.jar
 
 %files
-%defattr(-,root,root,-)
 %{_javadir}/*
 %{_mavenpomdir}/*
 %{_mavendepmapfragdir}/%{name}
+%doc LICENSE NOTICE DEPENDENCIES
 
 %files javadoc
-%defattr(-,root,root,-)
 %doc %{_javadocdir}/*
+%doc LICENSE
 
