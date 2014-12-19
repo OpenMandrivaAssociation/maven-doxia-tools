@@ -1,92 +1,87 @@
 %{?_javapackages_macros:%_javapackages_macros}
-Name:		maven-doxia-tools
-Version:	1.4
-Release:	12.1%{?dist}
-Summary:	Maven Doxia Integration Tools
+Name:           maven-doxia-tools
+Version:        1.6
+Release:        2.1
+Group:		Development/Java
+Summary:        Maven Doxia Integration Tools
+License:        ASL 2.0
+URL:            http://maven.apache.org/doxia/doxia-tools/
+BuildArch:      noarch
 
+Source0:        http://repo1.maven.org/maven2/org/apache/maven/doxia/doxia-integration-tools/%{version}/doxia-integration-tools-%{version}-source-release.zip
 
-License:	ASL 2.0
-URL:		http://maven.apache.org/shared/maven-doxia-tools/
-Source0:	http://repo1.maven.org/maven2/org/apache/maven/shared/%{name}/%{version}/%{name}-%{version}-source-release.zip
-Patch0:		%{name}-migration-to-component-metadata.patch
+Patch0:         0001-Port-to-Maven-3-APIs.patch
 
-BuildRequires:	apache-commons-io >= 1.4
-BuildRequires:	apache-commons-logging
-BuildRequires:	plexus-utils
-BuildRequires:	plexus-interpolation
-BuildRequires:	plexus-containers-container-default
-BuildRequires:	plexus-i18n
-BuildRequires:	maven-local
-BuildRequires:  maven-doxia-logging-api
-BuildRequires:	maven-doxia-sitetools
-BuildRequires:	maven-compiler-plugin
-BuildRequires:	maven-install-plugin
-BuildRequires:	maven-jar-plugin
-BuildRequires:	maven-javadoc-plugin
-BuildRequires:	maven-resources-plugin
-BuildRequires:	maven-surefire-plugin
-BuildRequires:	maven-plugin-testing-harness
-BuildRequires:	maven-shared-reporting-impl
-BuildRequires:	plexus-containers-component-metadata
-BuildRequires:	java-devel >= 1:1.6.0
-
-BuildArch:	noarch
-
-Requires:	apache-commons-io >= 1.4
-Requires:	plexus-utils
-Requires:	plexus-interpolation
-Requires:	plexus-containers-container-default
-Requires:	plexus-i18n
-Requires:       maven-doxia-logging-api
-Requires:	maven-doxia-sitetools
-
-Requires:	jpackage-utils
+BuildRequires:  maven-local
+BuildRequires:  mvn(commons-io:commons-io)
+BuildRequires:  mvn(org.apache.maven.doxia:doxia-decoration-model)
+BuildRequires:  mvn(org.apache.maven.doxia:doxia-logging-api)
+BuildRequires:  mvn(org.apache.maven:maven-artifact)
+BuildRequires:  mvn(org.apache.maven:maven-compat)
+BuildRequires:  mvn(org.apache.maven:maven-core)
+BuildRequires:  mvn(org.apache.maven:maven-model)
+BuildRequires:  mvn(org.apache.maven:maven-parent:pom:)
+BuildRequires:  mvn(org.apache.maven:maven-plugin-api)
+BuildRequires:  mvn(org.apache.maven.reporting:maven-reporting-api)
+BuildRequires:  mvn(org.codehaus.plexus:plexus-component-annotations)
+BuildRequires:  mvn(org.codehaus.plexus:plexus-component-metadata)
+BuildRequires:  mvn(org.codehaus.plexus:plexus-container-default)
+BuildRequires:  mvn(org.codehaus.plexus:plexus-i18n)
+BuildRequires:  mvn(org.codehaus.plexus:plexus-interpolation)
+BuildRequires:  mvn(org.codehaus.plexus:plexus-utils)
 
 %description
 A collection of tools to help the integration of Doxia in Maven plugins.
 
 %package javadoc
-Summary:	Javadoc for %{name}
-
-Requires:	jpackage-utils
+Summary:        API documentation for %{name}
 
 %description javadoc
-API documentation for %{name}.
+This package contains %{summary}.
 
 %prep
-%setup -q
-%patch0 -b .sav
+%setup -q -n doxia-integration-tools-%{version}
+%patch0 -p1 -b .sav
 %pom_xpath_remove "pom:dependency[pom:scope[text()='test']]"
+%pom_set_parent org.apache.maven:maven-parent:24
+
+%mvn_file : %{name}
+%mvn_alias : org.apache.maven.doxia:doxia-integration-tools
+%mvn_alias : org.apache.maven.shared:maven-doxia-tools
 
 %build
-mvn-rpmbuild \
-	-Dmaven.test.skip=true \
-	install javadoc:aggregate
+%mvn_build -f
 
 %install
-# jars
-install -Dm 644 target/%{name}-%{version}.jar %{buildroot}/%{_javadir}/%{name}.jar
+%mvn_install
 
-# javadoc
-install -d -m 755 %{buildroot}/%{_javadocdir}/%{name}
-cp -pr target/site/apidocs/* %{buildroot}/%{_javadocdir}/%{name}
+%files -f .mfiles
+%doc LICENSE NOTICE
 
-# poms
-install -Dpm 644 pom.xml %{buildroot}/%{_mavenpomdir}/JPP-%{name}.pom
-
-%add_maven_depmap JPP-%{name}.pom %{name}.jar -a org.apache.maven.doxia:doxia-integration-tools
-
-%files
-%{_javadir}/*
-%{_mavenpomdir}/*
-%{_mavendepmapfragdir}/%{name}
-%doc LICENSE NOTICE DEPENDENCIES
-
-%files javadoc
-%doc %{_javadocdir}/*
-%doc LICENSE
+%files javadoc -f .mfiles-javadoc
+%doc LICENSE NOTICE
 
 %changelog
+* Mon Jul 21 2014 Mikolaj Izdebski <mizdebsk@redhat.com> - 1.6-2
+- Fix org.apache.maven.shared:maven-doxia-tools alias
+
+* Sun Jul 20 2014 Mikolaj Izdebski <mizdebsk@redhat.com> - 1.6-1
+- Update to upstream version 1.6
+
+* Sat Jun 07 2014 Fedora Release Engineering <rel-eng@lists.fedoraproject.org> - 1.4-16
+- Rebuilt for https://fedoraproject.org/wiki/Fedora_21_Mass_Rebuild
+
+* Tue Mar 04 2014 Stanislav Ochotnicky <sochotnicky@redhat.com> - 1.4-15
+- Use Requires: java-headless rebuild (#1067528)
+
+* Fri Jan 17 2014 Mikolaj Izdebski <mizdebsk@redhat.com> - 1.4-14
+- Port to Maven 3 API
+
+* Tue Oct  1 2013 Mikolaj Izdebski <mizdebsk@redhat.com> - 1.4-13
+- Install NOTICE file with javadoc package
+- Update to current packaging guidelines
+- Fix BuildRequires
+
 * Sat Aug 03 2013 Fedora Release Engineering <rel-eng@lists.fedoraproject.org> - 1.4-12
 - Rebuilt for https://fedoraproject.org/wiki/Fedora_20_Mass_Rebuild
 
@@ -146,3 +141,4 @@ install -Dpm 644 pom.xml %{buildroot}/%{_mavenpomdir}/JPP-%{name}.pom
 * Wed Mar 31 2010 Mary Ellen Foster <mefoster at gmail.com> 1.2-1
 - Initial version
 - Don't run tests until maven-surefire is rebuilt
+

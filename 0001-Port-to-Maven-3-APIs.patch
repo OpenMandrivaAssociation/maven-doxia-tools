@@ -1,0 +1,66 @@
+From a9c78b4e8321139d4177119468955984f97fe0ba Mon Sep 17 00:00:00 2001
+From: Mikolaj Izdebski <mizdebsk@redhat.com>
+Date: Fri, 17 Jan 2014 17:09:07 +0100
+Subject: [PATCH] Port to Maven 3 APIs
+
+---
+ pom.xml | 16 ++++++++--------
+ 1 file changed, 8 insertions(+), 8 deletions(-)
+
+diff --git a/pom.xml b/pom.xml
+index d4d994d..d9888de 100644
+--- a/pom.xml
++++ b/pom.xml
+@@ -36,7 +36,7 @@
+   <description>A collection of tools to help the integration of Doxia in Maven plugins.</description>
+ 
+   <prerequisites>
+-    <maven>2.2.1</maven>
++    <maven>${mavenVersion}</maven>
+   </prerequisites>
+ 
+   <scm>
+@@ -58,7 +58,7 @@
+   <properties>
+     <doxiaVersion>1.6</doxiaVersion>
+     <doxiaSitetoolsVersion>1.6</doxiaSitetoolsVersion>
+-    <mavenVersion>2.2.1</mavenVersion>
++    <mavenVersion>3.1.1</mavenVersion>
+   </properties>
+ 
+   <dependencies>
+@@ -75,25 +75,25 @@
+     </dependency>
+ 
+     <!-- maven -->
+-    <dependency>
++     <dependency>
+       <groupId>org.apache.maven</groupId>
+-      <artifactId>maven-artifact</artifactId>
++      <artifactId>maven-core</artifactId>
+       <version>${mavenVersion}</version>
+     </dependency>
+-    <dependency>
++     <dependency>
+       <groupId>org.apache.maven</groupId>
+-      <artifactId>maven-artifact-manager</artifactId>
++      <artifactId>maven-compat</artifactId>
+       <version>${mavenVersion}</version>
+       <scope>provided</scope>
+     </dependency>
+     <dependency>
+       <groupId>org.apache.maven</groupId>
+-      <artifactId>maven-model</artifactId>
++      <artifactId>maven-artifact</artifactId>
+       <version>${mavenVersion}</version>
+     </dependency>
+     <dependency>
+       <groupId>org.apache.maven</groupId>
+-      <artifactId>maven-project</artifactId>
++      <artifactId>maven-model</artifactId>
+       <version>${mavenVersion}</version>
+       <scope>provided</scope>
+     </dependency>
+-- 
+1.9.3
+
