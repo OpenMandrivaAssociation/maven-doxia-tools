@@ -1,7 +1,7 @@
 %{?_javapackages_macros:%_javapackages_macros}
 Name:           maven-doxia-tools
 Version:        1.6
-Release:        2.1
+Release:        2.2
 Group:		Development/Java
 Summary:        Maven Doxia Integration Tools
 License:        ASL 2.0
