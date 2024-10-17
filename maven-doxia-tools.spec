@@ -5,7 +5,7 @@ Release:        2.3
 Group:		Development/Java
 Summary:        Maven Doxia Integration Tools
 License:        ASL 2.0
-URL:            http://maven.apache.org/doxia/doxia-tools/
+URL:            https://maven.apache.org/doxia/doxia-tools/
 BuildArch:      noarch
 
 Source0:        http://repo1.maven.org/maven2/org/apache/maven/doxia/doxia-integration-tools/%{version}/doxia-integration-tools-%{version}-source-release.zip
